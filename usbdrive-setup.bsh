@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ "${1}" == "" ]
+then
+    echo "Usage: "${0}" <partition-name>"
+    exit -1
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    exit
+fi
+
+echo "Seems you're allowed in!"
+echo ""
+
+mntname=${1}
+echo "Setting up mount point: /mnt/"${mntname}
+echo ""
+
+blkid=$(blkid | grep -i ${mntname})
+#echo "blkid: "${blkid}
+dev=$(echo ${blkid} | grep -i ${mntname} | awk -F: '{print $1}')
+#echo "dev: "${dev}
+
+uuid=$(blkid -s UUID | grep ${dev} | awk -F= '{print $2}' | sed 's/"//g')
+#echo "uuid: "${uuid}
+
+fstabentries=$(grep -c ${uuid} /etc/fstab)
+if [ "0" == "${fstabentries}" ]
+then
+    apt-get install -y ntfs-3g
+
+    mkdir -p /mnt/mybook
+    chmod 775 /mnt/mybook
+
+    mount -t ntfs ${dev} /mnt/mybook
+    
+    echo "UUID=${uuid} /mnt/mybook ntfs defaults" >> /etc/fstab
+else
+    echo "Already setup!"
+fi
+
+exit
+
