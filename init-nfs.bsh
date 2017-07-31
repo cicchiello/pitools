@@ -1,0 +1,67 @@
+#!/bin/bash
+
+if [ "${1}" == "" ]
+then
+    echo "Usage: "${0}" <mnt-name>"
+    exit -1
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    exit
+fi
+
+echo "Seems you're allowed in!"
+echo ""
+
+# accept either /mnt/<mount-name> or <mount-name>
+mntname=$(echo ${1} | sed 's?/mnt/??g')
+
+echo "Setting up to share mount point: /mnt/"${mntname}
+echo ""
+
+sudo apt-get install nfs-common nfs-server -y
+
+mkdir -p /mnt/nfsserver
+chmod 775 /mnt/nfsserver
+
+apt-get install nfs-common nfs-kernel-server
+
+here=$(dirname ${0})
+echo "work dir: "${here}
+
+has_ipv6=$(lsmod | grep -c ipv6)
+if [ "0" == "${has_ipv6}" ]
+then
+    echo "ipv6" >> /etc/modules
+fi
+
+exit -1
+
+#all the following must only be done once
+exportCnt=$(grep -c "/mnt/nfsserver" /etc/exports)
+if [ "0" == "${exportCnt}" ]
+then
+    echo "/mnt/nfsserver 192.168.1.0/24 *(rw,sync)" >> /etc/exports
+
+    cat "Hello from your friendly neighborhood nfs server!" > /mnt/nfsserver/foo
+
+    cp /etc/init.d/nfs-kernel-server /etc/init.d/nfs-kernel-server.pristine
+    cp /etc/default/nfs-kernel-server /etc/default/nfs-kernel-server.pristin
+    cp /etc/default/nfs-connon /etc/default/nfs-common.pristine
+
+    cp ${here}/etc/nfs-kernel-server.script /etc/init.d/nfs-kernel-server
+    cp ${here}/etc/nfs-kernel-server.cfg /etc/default/nfs-kernel-server
+    cp ${here}/etc/nfs-common /etc/defaults/nfs-common
+
+    # may not be necessary
+    systemctl daemon-reload
+
+    # start the nfs server
+    service nfs-kernel-server start
+
+    # may not be necessary
+    exportfs
+fi
