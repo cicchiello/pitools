@@ -16,21 +16,19 @@ fi
 echo "Seems you're allowed in!"
 echo ""
 
+here=$(dirname ${0})
+echo "work dir: "${here}
+
 # accept either /mnt/<mount-name> or <mount-name>
 mntname=$(echo ${1} | sed 's?/mnt/??g')
 
 echo "Setting up to share mount point: /mnt/"${mntname}
 echo ""
 
-sudo apt-get install nfs-common nfs-server -y
+apt-get install nfs-common nfs-server nfs-kernel-server -y
 
 mkdir -p /mnt/nfsserver
 chmod 775 /mnt/nfsserver
-
-apt-get install nfs-common nfs-kernel-server
-
-here=$(dirname ${0})
-echo "work dir: "${here}
 
 has_ipv6=$(lsmod | grep -c ipv6)
 if [ "0" == "${has_ipv6}" ]
@@ -65,3 +63,19 @@ then
     # may not be necessary
     exportfs
 fi
+
+
+
+apt-get install netatalk -y
+
+# the following should only be done once
+appleCnt=$(grep -c "/etc/netatalk/AppleVolumes.default.pristine")
+if [ "0" == "${appleCnt}" ]
+then
+    cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
+
+    cp ${here}/etc/AppleVolumes.default /etc/netatalk/AppleVolumes.default
+
+    /etc/init.d/netatalk start
+fi
+
