@@ -20,7 +20,7 @@ here=$(dirname ${0})
 echo "work dir: "${here}
 
 # accept either /mnt/<mount-name> or <mount-name>
-mntname=$(echo ${1} | sed 's?/mnt/??g')
+mntname=$(echo ${1} | sed 's?/mnt/??g' | sed 's?/$??g')
 
 echo "Setting up to share mount point: /mnt/"${mntname}
 echo ""
@@ -36,15 +36,13 @@ then
     echo "ipv6" >> /etc/modules
 fi
 
-exit -1
-
 #all the following must only be done once
 exportCnt=$(grep -c "/mnt/nfsserver" /etc/exports)
 if [ "0" == "${exportCnt}" ]
 then
     echo "/mnt/nfsserver 192.168.1.0/24 *(rw,sync)" >> /etc/exports
 
-    cat "Hello from your friendly neighborhood nfs server!" > /mnt/nfsserver/foo
+    echo "Hello from your friendly neighborhood nfs server!" > /mnt/nfsserver/foo
 
     cp /etc/init.d/nfs-kernel-server /etc/init.d/nfs-kernel-server.pristine
     cp /etc/default/nfs-kernel-server /etc/default/nfs-kernel-server.pristin
@@ -69,13 +67,15 @@ fi
 apt-get install netatalk -y
 
 # the following should only be done once
-appleCnt=$(grep -c "/etc/netatalk/AppleVolumes.default.pristine")
-if [ "0" == "${appleCnt}" ]
+if [ ! -f "/etc/netatalk/AppleVolumes.default.pristine" ]
 then
     cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
 
     cp ${here}/etc/AppleVolumes.default /etc/netatalk/AppleVolumes.default
 
     /etc/init.d/netatalk start
+
+    echo ""
+    echo "INFO: A reboot is necessary"
 fi
 
