@@ -40,7 +40,7 @@ fi
 exportCnt=$(grep -c "/mnt/nfsserver" /etc/exports)
 if [ "0" == "${exportCnt}" ]
 then
-    echo "/mnt/nfsserver 192.168.1.0/24 *(rw,sync)" >> /etc/exports
+    echo "/mnt/nfsserver 192.168.1.0/24(rw,sync)" >> /etc/exports
 
     echo "Hello from your friendly neighborhood nfs server!" > /mnt/nfsserver/foo
 
