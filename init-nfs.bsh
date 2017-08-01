@@ -28,7 +28,7 @@ echo ""
 apt-get install nfs-common nfs-server nfs-kernel-server -y
 
 mkdir -p /mnt/nfsserver
-chmod 775 /mnt/nfsserver
+chmod 777 /mnt/nfsserver
 
 has_ipv6=$(lsmod | grep -c ipv6)
 if [ "0" == "${has_ipv6}" ]
