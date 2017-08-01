@@ -16,7 +16,7 @@ fi
 echo "Seems you're allowed in!"
 echo ""
 
-mntname=${1}
+mntname=$(echo ${1} | tr [:upper:] [:lower:])
 echo "Setting up mount point: /mnt/"${mntname}
 echo ""
 
@@ -33,12 +33,12 @@ if [ "0" == "${fstabentries}" ]
 then
     apt-get install -y ntfs-3g
 
-    mkdir -p /mnt/mybook
-    chmod 775 /mnt/mybook
+    mkdir -p /mnt/${mntname}
+    chmod 775 /mnt/${mntname}
 
-    mount -t ntfs ${dev} /mnt/mybook
+    mount -t ntfs ${dev} /mnt/${mntname}
     
-    echo "UUID=${uuid} /mnt/mybook ntfs defaults" >> /etc/fstab
+    echo "UUID=${uuid} /mnt/${mntname} ntfs defaults" >> /etc/fstab
 else
     echo "Already setup!"
 fi
