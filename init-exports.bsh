@@ -27,9 +27,6 @@ echo ""
 
 apt-get install nfs-common nfs-server nfs-kernel-server -y
 
-mkdir -p /mnt/nfsserver
-chmod 777 /mnt/nfsserver
-
 has_ipv6=$(lsmod | grep -c ipv6)
 if [ "0" == "${has_ipv6}" ]
 then
@@ -37,12 +34,12 @@ then
 fi
 
 #all the following must only be done once
-exportCnt=$(grep -c "/mnt/nfsserver" /etc/exports)
+exportCnt=$(grep -c "/mnt/${mntname}" /etc/exports)
 if [ "0" == "${exportCnt}" ]
 then
-    echo "/mnt/nfsserver 192.168.1.0/24(rw,sync)" >> /etc/exports
+    echo "/mnt/${mntname} 192.168.1.0/24(rw,sync)" >> /etc/exports
 
-    echo "Hello from your friendly neighborhood nfs server!" > /mnt/nfsserver/foo
+    echo "Hello from your friendly neighborhood nfs server!" > /mnt/${mntname}/foo
 
     cp /etc/init.d/nfs-kernel-server /etc/init.d/nfs-kernel-server.pristine
     cp /etc/default/nfs-kernel-server /etc/default/nfs-kernel-server.pristin
@@ -71,7 +68,8 @@ if [ ! -f "/etc/netatalk/AppleVolumes.default.pristine" ]
 then
     cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
 
-    cp ${here}/etc/AppleVolumes.default /etc/netatalk/AppleVolumes.default
+    cat ${here}/etc/AppleVolumes.default | sed "s?mntname?${mntname}?g" >
+        /etc/netatalk/AppleVolumes.default
 
     /etc/init.d/netatalk start
 
@@ -79,3 +77,14 @@ then
     echo "INFO: A reboot is necessary"
 fi
 
+
+
+apt-get install samba samba-common-bin -y
+
+if [ ! -f "/etc/samba/smb.conf.pristine" ]
+then
+    cp /etc/samba/smb.conf /etc/samba/smb.conf.pristine
+
+    cat ${here}/etc/smb.conf | sed "s?mntname?${mntname}?g" >
+        /etc/samba/smb.conf
+fi
