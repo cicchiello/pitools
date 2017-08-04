@@ -25,6 +25,7 @@ mntname=$(echo ${1} | sed 's?/mnt/??g' | sed 's?/$??g')
 echo "Setting up to share mount point: /mnt/"${mntname}
 echo ""
 
+apt-get update
 apt-get install nfs-common nfs-server nfs-kernel-server -y
 
 has_ipv6=$(lsmod | grep -c ipv6)
@@ -68,8 +69,8 @@ if [ ! -f "/etc/netatalk/AppleVolumes.default.pristine" ]
 then
     cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
 
-    cat ${here}/etc/AppleVolumes.default | sed "s?mntname?${mntname}?g" >
-        /etc/netatalk/AppleVolumes.default
+    cat ${here}/etc/AppleVolumes.default | sed "s?mntname?${mntname}?g" \
+       > /etc/netatalk/AppleVolumes.default
 
     /etc/init.d/netatalk start
 
@@ -85,6 +86,6 @@ if [ ! -f "/etc/samba/smb.conf.pristine" ]
 then
     cp /etc/samba/smb.conf /etc/samba/smb.conf.pristine
 
-    cat ${here}/etc/smb.conf | sed "s?mntname?${mntname}?g" >
-        /etc/samba/smb.conf
+    cat ${here}/etc/smb.conf | sed "s?mntname?${mntname}?g" \
+	   > /etc/samba/smb.conf
 fi

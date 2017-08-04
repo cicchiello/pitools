@@ -31,6 +31,7 @@ uuid=$(blkid -s UUID | grep ${dev} | awk -F= '{print $2}' | sed 's/"//g')
 fstabentries=$(grep -c ${uuid} /etc/fstab)
 if [ "0" == "${fstabentries}" ]
 then
+    apt-get update
     apt-get install -y ntfs-3g
 
     mkdir -p /mnt/${mntname}
