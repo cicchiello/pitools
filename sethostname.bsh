@@ -16,18 +16,18 @@ fi
 echo "Seems you're allowed in!"
 echo ""
 
-hostname=$(dirname ${0})
+hostname=${1}
 
 if [ ! -f "/etc/hosts.pristine" ]
 then
     cp /etc/hosts /etc/hosts.pristine
     
-    cat /etc/hosts | sed 's/^\(127.0.1.1\t\)raspberrypi/\1${hostname}/g' \
+    cat /etc/hosts | sed "s/^\(127.0.1.1\t\)raspberrypi/\1${hostname}/g" \
     	> /etc/hosts
 
     cp /etc/hostname /etc/hostname.pristine
     
-    cat /etc/hostname | sed 's/raspberrypi/${hostname}/g' \
+    cat /etc/hostname | sed "s/raspberrypi/${hostname}/g" \
         > /etc/hostname
 
     echo "INFO: Success; hostname changed to ${hostname}"
