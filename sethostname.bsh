@@ -17,19 +17,22 @@ echo "Seems you're allowed in!"
 echo ""
 
 hostname=${1}
+echo "Changing hostname to ${hostname}"
 
 if [ ! -f "/etc/hosts.pristine" ]
 then
     cp /etc/hosts /etc/hosts.pristine
     
     cat /etc/hosts | sed "s/^\(127.0.1.1\t\)raspberrypi/\1${hostname}/g" \
-    	> /etc/hosts
-
+    	> /tmp/hosts
+    cp /tmp/hosts /etc/hosts
+    
     cp /etc/hostname /etc/hostname.pristine
     
     cat /etc/hostname | sed "s/raspberrypi/${hostname}/g" \
-        > /etc/hostname
-
+        > /tmp/hostname
+    cp /tmp/hostname /etc/hostname
+    
     echo "INFO: Success; hostname changed to ${hostname}"
     echo ""
     echo "INFO: Rebooting..."
