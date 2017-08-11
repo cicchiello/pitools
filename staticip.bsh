@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ "${1}" == "" ]
+then
+    echo "Usage: "${0}" <static-ip>"
+    exit -1
+fi
+
+echo "Seems you're allowed in!"
+echo ""
+
+sip=${1}
+echo "Setting static ip to ${sip}"
+
+if [ ! -f "/etc/dhcpcd.conf.pristine" ]
+then
+    cp /etc/dhcpcd.conf /etc/dhcpcd.conf.pristine
+
+    echo "" >> /etc/dhcpcd.conf
+    echo "interface eth0" >> /etc/dhcpcd.conf
+    echo "" >> /etc/dhcpcd.conf
+    echo "static ip_address=${sip}/24" >> /etc/dhcpcd.conf
+    echo "static routers=192.168.1.1" >> /etc/dhcpcd.conf
+    echo "static domain_name_servers=192.168.1.1" >> /etc/dhcpcd.conf
+    
+fi
