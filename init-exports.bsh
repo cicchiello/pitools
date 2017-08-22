@@ -62,21 +62,21 @@ fi
 
 
 
-apt-get install netatalk -y
-
-# the following should only be done once
-if [ ! -f "/etc/netatalk/AppleVolumes.default.pristine" ]
-then
-    cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
-
-    cat ${here}/etc/AppleVolumes.default | sed "s?mntname?${mntname}?g" \
-       > /etc/netatalk/AppleVolumes.default
-
-    /etc/init.d/netatalk start
-
-    echo ""
-    echo "INFO: A reboot is necessary"
-fi
+#apt-get install netatalk -y
+#
+## the following should only be done once
+#if [ ! -f "/etc/netatalk/AppleVolumes.default.pristine" ]
+#then
+#    cp /etc/netatalk/AppleVolumes.default /etc/netatalk/AppleVolumes.default.pristine
+#
+#    cat ${here}/etc/AppleVolumes.default | sed "s?mntname?${mntname}?g" \
+#       > /etc/netatalk/AppleVolumes.default
+#
+#    /etc/init.d/netatalk start
+#
+#    echo ""
+#    echo "INFO: A reboot is necessary"
+#fi
 
 
 
