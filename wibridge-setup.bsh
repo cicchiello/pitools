@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ "${1}" == "" ]
+then
+    echo "Usage: "${0}" <static-ip>"
+    exit -1
+fi
+
+echo "Seems you're allowed in!"
+echo ""
+
+if [ ! -f /etc/network/interfaces.pristine ]
+then
+    mv /etc/network/interfaces /etc/network/interfaces.pristine
+    cp /home/pi/pitools/etc/wibridge-interfaces /etc/network/interfaces
+fi
+
+if [ ! -f /home/pi/pitools/.dhcp-installed ]
+then
+    apt-get install isc-dhcp-server
+    touch /home/pi/pitools/.dhcp-installed
+
+    mv /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.pristine
+    cp /home/pi/pitools/etc/wibridge-dhcpd.conf /etc/dhcp/dhcpd.conf
+
+    mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.pristine
+    cp /home/pi/pitools/etc/wibridge-isc-dhcp-server /etc/default/isc-dhcp-server
+fi
