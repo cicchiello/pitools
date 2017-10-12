@@ -25,4 +25,6 @@ then
 
     mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.pristine
     cp /home/pi/pitools/etc/wibridge-isc-dhcp-server /etc/default/isc-dhcp-server
+
+    service isc-dhcp-server restart
 fi
