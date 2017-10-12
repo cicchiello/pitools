@@ -28,3 +28,31 @@ then
 
     service isc-dhcp-server restart
 fi
+
+if [ ! -f /home/pi/pitools/.hostapd-installed ]
+then
+    apt-get install -y hostapd
+    touch /home/pi/pitools/.hostapd-installed
+
+    #mv /etc/hostapd/hostapd.conf /etc/hostapd/hostapd.conf.pristine
+    cp /home/pi/pitools/etc/wibridge-hostapd.conf /etc/hostapd/hostapd.conf
+
+    mv /etc/default/hostapd /etc/default/hostapd.pristine
+    cp /home/pi/pitools/etc/wibridge-hostapd /etc/default/hostapd
+fi
+
+if [ ! -f /home/pi/pitools/.ip-forwarding-enabled ]
+then
+    mv /etc/sysctl.conf /etc/sysctl.conf.pristine
+    cp /home/pi/pitools/etc/wibridge-sysctl.conf /etc/sysctl.conf
+
+    sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+    iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE
+    iptables -A FORWARD -i wlan1 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -i wlan0 -o wlan1 -j ACCEPT
+
+    sh -c "iptables-save > /etc/iptables.ipv4.nat"
+    
+    touch /home/pi/pitools/.ip-forwarding-enabled
+fi
