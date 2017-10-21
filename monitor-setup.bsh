@@ -1,0 +1,102 @@
+#!/bin/bash
+
+addr="<undef>"
+pass="<undef>"
+hub="<undef>"
+port="<undef>"
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case $key in
+        -a|--address)
+        addr="$2"
+        shift # past argument
+        shift # past value
+        ;;
+	-p|--pass|--password)
+	pass="$2"
+        shift # past argument
+        shift # past value
+        ;;
+	-h|--hub)
+	hub="$2"
+        shift # past argument
+        shift # past value
+        ;;
+	-p|--port)
+	port="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    esac
+done
+
+bad=0
+if [ "${addr}" = "<undef>" ]; then
+   bad=1
+fi
+if [ "${pass}" = "<undef>" ]; then
+   bad=1
+fi
+if [ "${hub}" = "<undef>" ]; then
+   bad=1
+fi
+if [ "${port}" = "<undef>" ]; then
+   bad=1
+fi
+if (( $bad == 1 )); then
+   echo ""
+   echo "Usage: "${0}" -a <uaddr> -p <pswd> -h <hub> -p <port>"
+   echo ""
+   echo "  where: -a|-address <uaddr> is the Authenticating User (like jcicchiello@ptd.net)"
+   echo "         -p|-pass    <pswd>  is that user's password"
+   echo "         -h|-hub     <hub>   is the SMTP outgoing host name:port (like promail.ptd.net)"
+   echo "         -p|--port   <port>  is the port number expected by the mail server (like 587)"
+   echo ""
+   exit -1
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    exit
+fi
+
+echo "Seems you're allowed in!"
+echo ""
+
+if [ ! -d /etc/ssmtp ]
+then
+    apt-get update
+    apt-get install ssmtp
+
+    mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.pristine
+    cp /etc/ssmtp/ssmtp.conf.pristine /etc/ssmtp/ssmtp.conf
+    
+    echo "AuthUser=${addr}" >> /etc/ssmtp/ssmtp.conf
+    echo "AuthPass=${pass}" >> /etc/ssmtp/ssmtp.conf
+    echo "FromLineOverride=YES" >> /etc/ssmtp/ssmtp.conf
+    echo "UseSTARTTLS=YES" >> /etc/ssmtp/ssmtp.conf
+    cat /etc/ssmtp/ssmtp.conf | sed "s/^mailhub=mail/mailhub=${hub}:${port}/g" > /tmp/ssmtp.conf
+    cat /tmp/ssmtp.conf | sed "s/^hostname=.*/hostname=${hub}/" > /tmp/ssmtp.conf2
+    cp /tmp/ssmtp.conf2 /etc/ssmtp/ssmtp.conf
+
+    mv /etc/ssmtp/revaliases /etc/ssmtp/revaliases.pristine
+    cp /etc/ssmtp/revaliases.pristine /etc/ssmtp/revaliases
+
+    echo "root:${addr}:${hub}:${port}" >> /etc/ssmtp/revaliases
+fi
+
+
+echo "ssmtp is now setup.  You should be able to write shell scripts that send"
+echo "email alerts based on test conditions, like so"
+echo "> ssmtp recipient@domain.com < alert-msg.txt"
+echo ""
+echo "Make sure that alert-msg.txt has this form: "
+echo "To: recipient@domain.com"
+echo "From: myemailaddress@gmail.com"
+echo "Subject: test email"
+echo ""
+echo "hello world!  The body starts after 1 blank line!"
+echo ""
