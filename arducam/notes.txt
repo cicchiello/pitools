@@ -1,0 +1,28 @@
+﻿* sudo apt-get install https://github.com/ArduCAM/Arduino.git
+* cd ArduCAM/examples/RaspberryPi
+* Level shift is necessary (5V ArduCAM vs 3.3V Raspberry Pi)
+   * There’s one bidirectional line (SDA).  It calls for an active level shift: https://www.google.com/patents/US6847230
+   * For the lines going from Pi to Cam (3.3V levels), it might work without any extra circuit (most CMOS inputs) accept TTL levels
+   * For the lines going from Cam to Pi, must protect the Pi from the 5V levels.  For those, use diode and pull-up resistor (so that reverse biased when Cam is driving logic one).
+   * Will only know if that’s all good enough by setting it up and trying!
+* Pin out: 
+   * Pinouts configured in arducam_ov2640_capture.cpp
+   * References: 
+      * http://wiringpi.com/reference/spi-library/
+      * https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+      * https://www.element14.com/community/servlet/JiveServlet/previewBody/73950-102-11-339300/pi3_gpio.png?01RI=5F7500FFF441BF7&01NA=ck
+   * It’s using the wiringPi pinouts
+   * SPI channel 0 is being used
+   * GPIO5 (header pin 18) is CS and tied to ArduCam pin 1
+   * MOSI (header pin 19) is tied to ArduCam pin 2
+   * MISO (header pin 21) is tied to ArduCam pin 3
+   * SCLK (header pin 23) is tied to ArduCam pin 4
+   * GND is tied to ArduCam pin 5
+   * 5V is tied to ArduCam pin 6
+   * SDA (header pin 3) is tied to ArduCam pin 7
+   * SDL (header pin 5) is tied to ArduCam pin 8
+
+
+It worked!
+* Here’s an example picture from my workbench of my oscope: https://drive.google.com/open?id=1jiE7beBTIDwz2nttfn-xzGgFtVPV_wd6
+* Here’s another example after turning out the light (it wasn’t pitch black by my judgement, but it was too low for a meaningful image): https://drive.google.com/open?id=1hCSsQsFBNCWv_Z-gQXRCAUtm_iQm8vr1
