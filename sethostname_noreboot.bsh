@@ -13,7 +13,7 @@ then
     exit
 fi
 
-echo "Seems you're allowed in!"
+#echo "Seems you're allowed in!"
 echo ""
 
 hostname=${1}
