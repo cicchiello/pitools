@@ -34,10 +34,10 @@ then
     cp /tmp/hostname /etc/hostname
     
     echo "INFO: Success; hostname changed to ${hostname}"
+    hostname ${hostname}
+    
     echo ""
     echo "INFO: Rebooting..."
-    /etc/init.d/hostname.sh
-
     reboot now
     
 else

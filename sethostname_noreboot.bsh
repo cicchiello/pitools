@@ -35,7 +35,7 @@ then
     
     echo "INFO: Success; hostname changed to ${hostname}"
     echo ""
-    /etc/init.d/hostname.sh
+    hostname ${hostname}
 
 else
     echo "WARNING: hostname not changed; it had previously been changed"
