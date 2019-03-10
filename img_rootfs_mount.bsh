@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function usage() {
+    echo ""
+    echo "usage: ${0} <file.img> {<mount-flags>}"
+    echo ""
+    echo "example:"
+    echo "> ${0} image.img norecovery"
+    echo "(Note, must be run as root)"
+}
+
+if [ "$#" -lt 1 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'ERROR: Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    usage
+    exit
+fi
+
+#echo "Seems you're allowed in!"
+
+if [ -e "${1}" ]
+then
+    IMG_FILE=${1}
+
+    FLAGS=""
+    if [ "${2}" != "" ]
+    then
+	FLAGS=",${2}"
+    fi
+    
+    SECTOR_OFFSET=$(/sbin/fdisk -l ${IMG_FILE}|grep Linux|awk '{print $2}')
+    BYTE_OFFSET=$(expr 512 \* ${SECTOR_OFFSET})
+    echo "Sector offset: " ${SECTOR_OFFSET}
+    echo "Byte offset: " ${BYTE_OFFSET}
+    mount -o loop,offset=${BYTE_OFFSET}${FLAGS} ${IMG_FILE} /mnt/img
+
+    echo ""
+    echo "INFO: rootfs image successfully mounted at /mnt/img"
+else
+    echo "ERROR: Please supply a *.img file as the only argument"
+    usage
+fi
+

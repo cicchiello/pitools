@@ -1,0 +1,59 @@
+#!/bin/bash
+
+function usage() {
+    echo ""
+    echo "usage: ${0} <file.img>"
+    echo ""
+    echo "(Note, must be run as root)"
+}
+
+if [ "$#" -ne 1 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'ERROR: Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    usage
+    exit
+fi
+
+echo "Seems you're allowed in!"
+$(fdisk -lu ${1})
+exit -1
+
+# May need to unallocated the unused space first, to put all the unallocated
+# stuff together per: https://softwarebakery.com//shrinking-images-on-linux
+#
+# > sudo modprobe loop
+# > sudo losetup -f
+# # Note the device returned: /dev/loop<#>
+# > sudo losetup /dev/loop<#> <img>
+# > sudo partprobe /dev/loop<#>
+# 
+# # Now, there will be 2 devices: /dev/loop<#>p1 /dev/loop<#>p2
+#
+# > sudo XAUTHORITY=$HOME/.Xauthority gparted /dev/loop<#>
+# Select the partition, select Resize/Move and change to 3000, then Apply
+#
+# (I've found I cannot make the partition as small as I think I should be
+#  able to -- 3000 works with a fresh raspbian img, otherwise some trial
+#  and error may be necessary)
+#
+# Then use the following procedure to actually truncate the file:
+#
+# Example for now:
+# $ fdisk -lu image.img
+# Disk image.img: 4096 MB, 4096000000 bytes, 8000000 sectors
+# Units = sectors of 1 * 512 = 512 bytes
+# Sector size (logical/physical): 512 bytes / 512 bytes
+# I/O size (minimum/optimal): 512 bytes / 512 bytes
+# Disk identifier: 0x000a1bc7
+#
+#       Device Boot      Start         End      Blocks   Id  System
+# image.img1              2048     5872026     5869978    b  W95 FAT32
+#
+# $ truncate --size=$[(5872026+1)*512] image.img

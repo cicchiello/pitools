@@ -1,0 +1,57 @@
+#!/bin/bash
+
+function usage() {
+    echo ""
+    echo "usage: ${0} <sd-dev> <img.squashfs>"
+    echo ""
+    echo "where: <sd-dev>        is the sdcard device destination"
+    echo "       <img.squashfs>  is a file created by mksquashfs"
+    echo ""
+    echo "(Note, must be run as root)"
+}
+
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'ERROR: Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    usage
+    exit
+fi
+
+
+hasUtil=$(which mksquashfs)
+if [ "${hasUtil}" == "" ]
+then
+    echo "ERROR: No mksquashfs utility found."
+    echo ""
+    echo "INFO: To install, do the following: "
+    echo "  > sudp apt-get update && sudo apt-get install squashfs-tools"
+    echo ""
+    exit
+fi
+
+if [ -b "${1}" ]
+then
+
+    if [ -e "${2}" ]
+    then
+        echo "ERROR: ${2} exists"
+        usage
+    else
+	mkdir -p /tmp/empty-dir
+
+        echo "mksquashfs /tmp/empty-dir ${2} -p \"rpi_backup.img f 444 root root dd if=${1} bs=4M\""
+        mksquashfs /tmp/empty-dir ${2} -p "rpi_backup.img f 444 root root dd if=${1} bs=4M"
+    fi
+    
+else
+    echo "ERROR: Please supply a block device for reading (sdcard dev) the filesystem"
+    usage
+fi
+

@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function usage() {
+    echo ""
+    echo "usage: ${0} <squashfs.img> <image>"
+    echo ""
+    echo "where: <squashfs.img>  is a file created by mksquashfs"
+    echo "       <image>         is the dd-style image target file or device"
+    echo ""
+    echo "(Note, must be run as root)"
+}
+
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'ERROR: Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    usage
+    exit
+fi
+
+
+isDevice="0"
+isFile="0"
+
+srcFile="${1}"
+dstFile="${2}"
+
+if [ -f "${srcFile}" ]
+then
+
+    if [ -b "${dstFile}" ]
+    then
+	isDevice="1"
+    else
+	if [ -e "${dstFile}" ]
+	then
+            echo "ERROR: ${dstFile} exists"
+            usage
+	    exit
+	else
+	    isFile="1"
+	fi
+    fi
+    
+else
+    echo "ERROR: Please supply a file created by mksquashfs as the first argument"
+    usage
+    exit
+fi
+
+
+mkdir -p /mnt/rpi-to-sdcard
+mount ${srcFile} /mnt/rpi-to-sdcard
+
+echo "dd bs=4M if=/mnt/rpi-to-sdcard/rpi_backup.img of=${dstFile} conv=fsync"
+dd bs=4M if=/mnt/rpi-to-sdcard/rpi_backup.img of=${dstFile} conv=fsync
+
+umount /mnt/rpi-to-sdcard
