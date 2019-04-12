@@ -1,0 +1,90 @@
+#!/bin/bash
+
+if [ "${1}" == "" ]
+then
+    echo "Usage: "${0}" <hostname-prefix>"
+    exit -1
+fi
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    exit
+fi
+
+here=$(dirname ${0})
+prefix=${1}
+
+apt-get -y update
+apt-get -y upgrade
+
+apt-get -y install hostapd
+apt-get -y install dnsmasq
+
+# don't automatically start hostapd -- only if/when home router isn't found
+systemctl disable hostapd
+systemctl disable dnsmasq
+
+if [ ! -f "/etc/hostapd/hostapd.conf" ]
+then
+    if [ ! -d "/etc/hostapd"]
+    then
+	mkdir /etc/hostapd
+    fi
+    
+    s=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2)
+    ssid="${prefix}-${s:${#s}-4:${#s}}"
+    cat ${here}/etc/hostapd/hostapd.conf |
+    	sed 's/SSID/${ssid}/g' |
+	sed 's/PASSPHRASE/${prefix}/g' > /etc/hostapd/hostapd.conf
+
+    chown root:root /etc/hostapd/hostapd.conf
+    chmod 644 /etc/hostapd/hostapd.conf
+fi
+
+if [ ! -f "/etc/default/hostapd.pristine" ]
+then
+    mv /etc/default/hostapd /etc/default/hostapd.pristine
+    cp ${here}/etc/default/hostapd /etc/default/hostapd
+
+    chown root:root /etc/default/hostapd
+    chmod 644 /etc/default/hostapd
+fi
+
+if [ ! -f "/etc/dnsmasq.conf.pristine" ]
+then
+    mv /etc/dnsmasq.conf /etc/dnsmasq.conf.pristine
+    cp ${here}/dnsmasq.conf /etc/dnsmasq.conf
+
+    chown root:root /etc/dnsmasq.conf
+    chmod 644 /etc/dnsmasq.conf
+fi
+
+# suggestion to avoid problems with pre 2.77 versions of dnsmasq
+apt-get purge dns-root-data
+
+# check dhcpcd.config
+has_wpa_supplicant=$(grep -c "nohook wpa_supplicant" /etc/dhcpcd.conf)
+if [ "0" == "${has_wpa_supplicant}" ]
+then
+    echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+fi
+
+# install autohotspot.service
+if [ ! -f "/etc/systemd/system/autohotspot.service" ]
+then
+    cp ${here}/etc/systemd/system/autohotspot.service /etc/systemd/system
+    
+    systemctl enable autohotspot.service
+fi
+
+# install the autohotspot.bsh script that will do all the hard work
+if [ ! -f "/usr/bin/autohotspot" ]
+then
+    cp ${here}/etc/bin/autohotspot /usr/bin/autohotspot
+
+    chown root:root /usr/bin/autohotspot
+    chmod 755 /usr/bin/autohotspot
+fi
+
