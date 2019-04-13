@@ -15,6 +15,7 @@ fi
 
 here=$(dirname ${0})
 prefix=${1}
+etc="${here}/ap-setup-etc"
 
 apt-get -y update
 apt-get -y upgrade
@@ -35,7 +36,7 @@ then
     
     s=$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2)
     ssid="${prefix}-${s:${#s}-4:${#s}}"
-    cat ${here}/etc/hostapd/hostapd.conf |
+    cat ${etc}/hostapd/hostapd.conf |
     	sed 's/SSID/${ssid}/g' |
 	sed 's/PASSPHRASE/${prefix}/g' > /etc/hostapd/hostapd.conf
 
@@ -46,7 +47,7 @@ fi
 if [ ! -f "/etc/default/hostapd.pristine" ]
 then
     mv /etc/default/hostapd /etc/default/hostapd.pristine
-    cp ${here}/etc/default/hostapd /etc/default/hostapd
+    cp ${etc}/default/hostapd /etc/default/hostapd
 
     chown root:root /etc/default/hostapd
     chmod 644 /etc/default/hostapd
@@ -55,7 +56,7 @@ fi
 if [ ! -f "/etc/dnsmasq.conf.pristine" ]
 then
     mv /etc/dnsmasq.conf /etc/dnsmasq.conf.pristine
-    cp ${here}/dnsmasq.conf /etc/dnsmasq.conf
+    cp ${etc}/dnsmasq.conf /etc/dnsmasq.conf
 
     chown root:root /etc/dnsmasq.conf
     chmod 644 /etc/dnsmasq.conf
@@ -74,7 +75,7 @@ fi
 # install autohotspot.service
 if [ ! -f "/etc/systemd/system/autohotspot.service" ]
 then
-    cp ${here}/etc/systemd/system/autohotspot.service /etc/systemd/system
+    cp ${etc}/systemd/system/autohotspot.service /etc/systemd/system
     
     systemctl enable autohotspot.service
 fi
@@ -82,7 +83,7 @@ fi
 # install the autohotspot.bsh script that will do all the hard work
 if [ ! -f "/usr/bin/autohotspot" ]
 then
-    cp ${here}/etc/bin/autohotspot /usr/bin/autohotspot
+    cp ${etc}/bin/autohotspot /usr/bin/autohotspot
 
     chown root:root /usr/bin/autohotspot
     chmod 755 /usr/bin/autohotspot
