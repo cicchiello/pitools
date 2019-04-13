@@ -63,13 +63,23 @@ then
 fi
 
 # suggestion to avoid problems with pre 2.77 versions of dnsmasq
-apt-get purge dns-root-data
+apt-get -y purge dns-root-data
 
 # check dhcpcd.config
 has_wpa_supplicant=$(grep -c "nohook wpa_supplicant" /etc/dhcpcd.conf)
 if [ "0" == "${has_wpa_supplicant}" ]
 then
     echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+fi
+
+# put a working wpa_supplicant in place
+if [ ! -f "/etc/wpa_supplicant/wpa_supplicant.conf.pristine" ]
+then
+    mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.pristine
+    cp ${etc}/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant
+
+    chown root:root /etc/wpa_supplicant/wpa_supplicant.conf
+    chmod 644 /etc/wpa_supplicant/wpa_supplicant.conf
 fi
 
 # install autohotspot.service
