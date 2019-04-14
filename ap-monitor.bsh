@@ -20,15 +20,20 @@ while true; do
     echo "" >> ${log}
     
     echo "INFO: checking hostapd" >> ${log}
-    systemctl status hostapd >> ${log}
+    systemctl --no-pager status hostapd >> ${log}
     echo "" >> ${log}
     echo "" >> ${log}
     
     echo "INFO: checking dnsmasq" >> ${log}
-    systemctl status dnsmasq >> ${log}
+    systemctl --no-pager status dnsmasq >> ${log}
     echo "" >> ${log}
     echo "" >> ${log}
 
+    echo "INFO: checking autohotspot service" >> ${log}
+    systemctl --no-pager status autohotspot >> ${log}
+    echo "" >> ${log}
+    echo "" >> ${log}
+    
     sleep 30
 done
 
