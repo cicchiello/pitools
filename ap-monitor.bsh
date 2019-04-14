@@ -8,24 +8,26 @@ then
 fi
 
 here=$(dirname ${0})
+log="/home/pi/ap-monitor.log"
 d=$(date)
-echo "INFO: Starting ap-monitor.bsh @ ${d}"
+
+echo "INFO: Starting ap-monitor.bsh @ ${d}" >> ${log}
 
 while true; do
-    echo "INFO: running ifconfig"
-    ifconfig
-    echo ""
-    echo ""
+    echo "INFO: running ifconfig" >> ${log}
+    ifconfig >> ${log}
+    echo "" >> ${log}
+    echo "" >> ${log}
     
-    echo "INFO: checking hostapd"
-    systemctl status hostapd
-    echo ""
-    echo ""
+    echo "INFO: checking hostapd" >> ${log}
+    systemctl status hostapd >> ${log}
+    echo "" >> ${log}
+    echo "" >> ${log}
     
-    echo "INFO: checking dnsmasq"
-    systemctl status dnsmasq
-    echo ""
-    echo ""
+    echo "INFO: checking dnsmasq" >> ${log}
+    systemctl status dnsmasq >> ${log}
+    echo "" >> ${log}
+    echo "" >> ${log}
 
     sleep 30
 done
