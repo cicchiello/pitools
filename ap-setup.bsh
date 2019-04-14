@@ -99,3 +99,19 @@ then
     chmod 755 /usr/bin/autohotspot
 fi
 
+
+if [ ! -f "/etc/rc.local.pristine" ]
+then
+    # install ap-monitor.bsh to run at boot
+    cmd="nohup /home/pi/pitools/ap-monitor.bsh 2>&1 >> /home/pi/ap-monitor.log"
+
+    mv /etc/rc.local /etc/rc.local.pristine
+    cat /etc/rc.local.pristine |
+	sed "s?exit 0?${cmd} &?g" > /etc/rc.local
+    echo "" >> /etc/rc.local
+    echo "exit 0" >> /etc/rc.local
+    echo "" >> /etc/rc.local
+
+    chown root:root /etc/rc.local
+    chmod 755 /etc/rc.local
+fi

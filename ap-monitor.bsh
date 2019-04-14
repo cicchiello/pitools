@@ -1,0 +1,32 @@
+#!/bin/bash
+
+user=`whoami`
+if [ "$user" != "root" ]
+then
+    echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    exit
+fi
+
+here=$(dirname ${0})
+d=$(date)
+echo "INFO: Starting ap-monitor.bsh @ ${d}"
+
+while true; do
+    echo "INFO: running ifconfig"
+    ifconfig
+    echo ""
+    echo ""
+    
+    echo "INFO: checking hostapd"
+    systemctl status hostapd
+    echo ""
+    echo ""
+    
+    echo "INFO: checking dnsmasq"
+    systemctl status dnsmasq
+    echo ""
+    echo ""
+
+    sleep 30
+done
+
