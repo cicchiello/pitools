@@ -4,6 +4,19 @@
 # http://andyfelong.com/2017/09/couchdb-2-1-on-raspberry-pi-raspbian-stretch/#more-743
 #
 
+function usage() {
+    echo ""
+    echo "usage: ${0} <couchdb-admin-username> <couchdb-admin-userpswd>"
+    echo ""
+    echo "(Note, must be run as root)"
+}
+
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
 user=`whoami`
 if [ "$user" != "root" ]
 then
@@ -13,6 +26,9 @@ fi
 
 echo "Seems you're allowed in!"
 echo ""
+
+couchdbUser="${1}"
+couchdbPswd="${2}"
 
 apt-get update
 apt-get upgrade
@@ -53,13 +69,17 @@ cp -Rp * /home/couchdb
 chown -R couchdb:couchdb /home/couchdb
 cd /home/couchdb/etc
 
-# need to edit IP address to allow external access
-has_bind_address=$(grep bind_address local.ini | grep -c -v \#bind_address)
-if [ "0" == "${has_bind_address}" ]
-then
-    echo "bind_address = 0.0.0.0" >> local.ini
-    echo "" >> local.ini
-fi
+# need to edit IP address to allow external access (if not already)
+rm -r local.ini.ipbak
+cp local.ini local.ini.ipbak
+cat local.ini.ipbak | sed 's/;bind_address = 127.0.0.1/bind_address = 0.0.0.0/g' > local.ini
+
+# add admin user/pswd to local.ini (on first run it'll be hashed)
+rm -f local.ini.adminbak
+cp local.ini local.ini.adminbak
+cat local.ini.adminbak | grep -v "${couchdbUser} = " > local.ini
+echo "${couchdbUser} = ${couchdbPswd}" >> local.ini
 
 # now add this line to rc.local
 # sudo -i -u couchdb /home/couchdb/bin/couchdb &
+
