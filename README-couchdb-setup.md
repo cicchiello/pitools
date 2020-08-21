@@ -4,7 +4,7 @@ This note is a bit of background and manual instruction for setup of a couchDb i
 
 ```
 > cd ~/pitools
-> sudo ./couchdb-setup.bsh
+> sudo ./couchdb-setup.bsh joe foo
 ```
 
 2) Manually check:
