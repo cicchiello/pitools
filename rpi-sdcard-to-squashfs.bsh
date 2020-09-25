@@ -4,8 +4,8 @@ function usage() {
     echo ""
     echo "usage: ${0} <sd-dev> <img.squashfs>"
     echo ""
-    echo "where: <sd-dev>        is the sdcard device destination"
-    echo "       <img.squashfs>  is a file created by mksquashfs"
+    echo "where: <sd-dev>        is the sdcard device source"
+    echo "       <img.squashfs>  is the destination file created by mksquashfs"
     echo ""
     echo "(Note, must be run as root)"
 }
@@ -31,7 +31,7 @@ then
     echo "ERROR: No mksquashfs utility found."
     echo ""
     echo "INFO: To install, do the following: "
-    echo "  > sudp apt-get update && sudo apt-get install squashfs-tools"
+    echo "  > sudo apt-get update && sudo apt-get install squashfs-tools"
     echo ""
     exit
 fi

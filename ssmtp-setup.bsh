@@ -1,5 +1,17 @@
 #!/bin/bash
 
+function usage() {
+   echo ""
+   echo "Usage: "${0}" -a <uaddr> --pass <pswd> -h <hub> --port <port>"
+   echo ""
+   echo "  where: -a|--address <uaddr> is the Authenticating User (like jcicchiello@ptd.net)"
+   echo "         --pass[word] <pswd>  is that user's password"
+   echo "         -h|--hub     <hub>   is the SMTP outgoing host name:port (like promail.ptd.net)"
+   echo "         --port       <port>  is the port number expected by the mail server (like 587)"
+   echo ""
+}
+
+
 addr="<undef>"
 pass="<undef>"
 hub="<undef>"
@@ -13,7 +25,7 @@ do
         shift # past argument
         shift # past value
         ;;
-	-p|--pass|--password)
+	--pass|--password)
 	pass="$2"
         shift # past argument
         shift # past value
@@ -23,11 +35,16 @@ do
         shift # past argument
         shift # past value
         ;;
-	-p|--port)
+	--port)
 	port="$2"
         shift # past argument
         shift # past value
         ;;
+	*)
+	echo "Unrecognized flag: ${2}"
+	usage
+	exit
+	;;
     esac
 done
 
@@ -44,15 +61,8 @@ fi
 if [ "${port}" = "<undef>" ]; then
    bad=1
 fi
-if (( $bad == 1 )); then
-   echo ""
-   echo "Usage: "${0}" -a <uaddr> -p <pswd> -h <hub> -p <port>"
-   echo ""
-   echo "  where: -a|-address <uaddr> is the Authenticating User (like jcicchiello@ptd.net)"
-   echo "         -p|-pass    <pswd>  is that user's password"
-   echo "         -h|-hub     <hub>   is the SMTP outgoing host name:port (like promail.ptd.net)"
-   echo "         -p|--port   <port>  is the port number expected by the mail server (like 587)"
-   echo ""
+if [ "$bad" = "1" ]; then
+   usage
    exit -1
 fi
 
@@ -66,10 +76,10 @@ fi
 echo "Seems you're allowed in!"
 echo ""
 
-if [ ! -d /etc/ssmtp ]
+if [ ! -f /etc/ssmtp/ssmtp.conf.pristine ]
 then
     apt-get update
-    apt-get install ssmtp
+    apt-get install ssmtp mailutils
 
     mv /etc/ssmtp/ssmtp.conf /etc/ssmtp/ssmtp.conf.pristine
     cp /etc/ssmtp/ssmtp.conf.pristine /etc/ssmtp/ssmtp.conf
@@ -91,12 +101,9 @@ fi
 
 echo "ssmtp is now setup.  You should be able to write shell scripts that send"
 echo "email alerts based on test conditions, like so"
-echo "> ssmtp recipient@domain.com < alert-msg.txt"
+echo "> mail -s \"some subject\" recipient@domain.com < alert-msg.txt"
 echo ""
 echo "Make sure that alert-msg.txt has this form: "
-echo "To: recipient@domain.com"
-echo "From: myemailaddress@gmail.com"
-echo "Subject: test email"
 echo ""
-echo "hello world!  The body starts after 1 blank line!"
+echo "hello world!  The body starts after 1 blank line and ends with another!"
 echo ""

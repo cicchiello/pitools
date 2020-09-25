@@ -37,7 +37,7 @@ then
     mkdir -p /mnt/${mntname}
     chmod 775 /mnt/${mntname}
 
-    mount -t ntfs ${dev} /mnt/${mntname}
+    mount -t ntfs-3g ${dev} /mnt/${mntname}
     
     echo "UUID=${uuid} /mnt/${mntname} ntfs defaults" >> /etc/fstab
 else
