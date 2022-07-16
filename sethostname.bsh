@@ -10,6 +10,12 @@ user=`whoami`
 if [ "$user" != "root" ]
 then
     echo 'Sorry, this shell script must be run as root; perhaps you meant to use "sudo"?'
+    echo ""
+    echo "This script attempts 3 things -- but they don't all always work! "
+    echo "  1: calls the linux hostname command"
+    echo "  2: changes the current hostname in /etc/hosts to match the new"
+    echo "  3: changes the current hostname in /etc/hostname to match the new"
+    echo ""
     exit
 fi
 
