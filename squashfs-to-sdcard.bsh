@@ -6,7 +6,7 @@ function usage() {
     echo ""
     echo "where: <squashfs.img>  is a file created by mksquashfs"
     echo "       <image>         is the dd-style image target file or device"
-    echo "       <shrink-temp>   path to place temporary shrunken *.img file (optional)
+    echo "       <shrink-temp>   path to place temporary shrunken *.img file (optional)"
     echo ""
     echo "Note1: must be run as root"
     echo "Note2: if <shrink-temp> is provided, it must be a path with enough space"
@@ -38,6 +38,7 @@ fi
 isDevice="0"
 isFile="0"
 
+pitools=$(dirname "${0}")
 srcFile="${1}"
 dstFile="${2}"
 tmpFile=""
@@ -75,7 +76,7 @@ mount ${srcFile} /mnt/rpi-to-sdcard
 srcimg="/mnt/rpi-to-sdcard/rpi_backup.img"
 
 if [ "$#" -eq 3 ]; then
-   ~/pitools/pishrink.sh -n "${srcimg}" "${3}"
+   "${pitools}/pishrink.sh" -n "${srcimg}" "${3}"
    srcimg="${3}"
 fi
 
