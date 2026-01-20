@@ -2,15 +2,25 @@
 
 function usage() {
     echo ""
-    echo "usage: ${0} <squashfs.img> <image>"
+    echo "usage: ${0} <squashfs.img> <image> [<shrink-temp>]"
     echo ""
     echo "where: <squashfs.img>  is a file created by mksquashfs"
     echo "       <image>         is the dd-style image target file or device"
+    echo "       <shrink-temp>   path to place temporary shrunken *.img file (optional)
     echo ""
-    echo "(Note, must be run as root)"
+    echo "Note1: must be run as root"
+    echo "Note2: if <shrink-temp> is provided, it must be a path with enough space"
+    echo "       for the fully expanded squashfs.img.  If not provided, the fully"
+    echo "       expanded image must fit on the specified output device (<image>)."
 }
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
+    echo "Illegal number of parameters"
+    usage
+    exit
+fi
+
+if [ "$#" -gt 3 ]; then
     echo "Illegal number of parameters"
     usage
     exit
@@ -30,6 +40,11 @@ isFile="0"
 
 srcFile="${1}"
 dstFile="${2}"
+tmpFile=""
+
+if [ "$#" -eq 3 ]; then
+   tmpFile="${3}"
+fi
 
 if [ -f "${srcFile}" ]
 then
@@ -57,8 +72,14 @@ fi
 
 mkdir -p /mnt/rpi-to-sdcard
 mount ${srcFile} /mnt/rpi-to-sdcard
+srcimg="/mnt/rpi-to-sdcard/rpi_backup.img"
+
+if [ "$#" -eq 3 ]; then
+   ~/pitools/pishrink.sh -n "${srcimg}" "${3}"
+   srcimg="${3}"
+fi
 
 echo "dd bs=4M if=/mnt/rpi-to-sdcard/rpi_backup.img of=${dstFile} conv=fsync"
-dd bs=4M if=/mnt/rpi-to-sdcard/rpi_backup.img of=${dstFile} conv=fsync status=progress
+dd bs=4M if=${srcimg} of=${dstFile} conv=fsync status=progress
 
 umount /mnt/rpi-to-sdcard
